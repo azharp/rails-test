@@ -1,6 +1,8 @@
 #- [LVL1-QUIZ]
 class Question < ApplicationRecord
 
+  has_many :user_answers
+
   #Validations:
   #- content and answer must be present
 
