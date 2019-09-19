@@ -7,29 +7,30 @@ class QuestionsController < ApplicationController
   def show
     id = params[:id]
 
+    if id.empty?
+      return render :status => :unprocessable_entity
+    end
+
     begin
       render json: Question.find(id)
     rescue ActiveRecord::RecordNotFound
-      render :status => 404
+      render :status => :not_found
     end
   end
 
   def answer
-    begin
-      UserAnswer.create answer_param
-      render json: true
-    rescue ActiveRecord::RecordNotFound
-      render :status => 404
+    id = params[:id]
+    answer = params[:question][:answer]
+
+    if answer.empty? || id.empty?
+      return render :status => :unprocessable_entity
     end
-  end
 
-  private
-
-  def question
-    params.require(:question).permit(:id)
-  end
-
-  def answer_param
-    params.require(:answer).permit(:id, question: [:answer])
+    begin
+      question = Question.find(id)
+      render json: {correct: question.check_answer(answer)}, :status => 200
+    rescue ActiveRecord::RecordNotFound
+      render :status => :not_found
+    end
   end
 end
